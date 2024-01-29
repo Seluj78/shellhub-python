@@ -1,12 +1,7 @@
 name: Linting
 on:
-  push:
-    branches:
-      - develop
-      - main
   pull_request:
     branches:
-      - develop
       - main
 
 jobs:
@@ -14,58 +9,103 @@ jobs:
     name: Linting with flake8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
-      - uses: actions/cache@v2
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
       - name: Lint with flake8
-        run: flake8 --max-line-length=120 . --exclude env,configuration,venv,src,tests,scripts,.venv,migrations
+        run: flake8 --max-line-length=120 . --exclude env,configuration,venv,src,scripts,.venv
 
   lint-black:
     name: Linting with black
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
-      - uses: actions/cache@v2
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
       - name: Lint with black
-        run: black dst_package -l119 --check
+        run: black shellhub -l119 --check
 
   lint-imports-order:
     name: Checking imports order
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
-      - uses: actions/cache@v2
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
       - name: Lint with reorder-python-imports
-        run: reorder-python-imports dst_package/*.py
+        run: reorder-python-imports shellhub/**/*.py
+
+  lint-typing:
+    name: Checking Typing with MyPy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install types-requests
+      - name: Lint with mypy
+        run: mypy --strict shellhub

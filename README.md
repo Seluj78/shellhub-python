@@ -1,4 +1,4 @@
-# [DataScientest base Package]
+# [Shellhub Python SDK]
 
 * [What is it](#what-is-it)
 * [Installation](#installation)
@@ -15,19 +15,23 @@
 
 ## What is it
 
-This repository contains the source code to a basic python package
+This repository contains the source code to a Shellhub (https://shellhub.io) Python SDK. It is used to interact with the Shellhub API.
+
+Tested with shellhub `v0.14.1`
+
+Open to all contributions, wether it is a bug fix, a new feature or a documentation improvement, or even a better way to do things.
 
 ## Installation
 
-Here you specify the steps to install locally this repository. For example:
+From pip: `pip install shellhub`
 
 ### Locally
 
 #### Create a virtual environment
 ```shell
-python3.8 -m venv venv
+python3.11 -m venv venv
 ```
-You can use any version starting python `3.7`
+You can use any version starting python `3.8`
 
 #### Activate it
 ```shell
@@ -79,7 +83,7 @@ A few seconds after, the package should be up in the pypi server.
 
 When contributing:
 
-- Create a branch based on `develop`
+- Create a branch based on `main`
 - Code on it and commit
 - Create PR
 - Wait for it to be approved and make sure all checks pass
@@ -87,3 +91,4 @@ When contributing:
 
 ## Code owner
 
+jules.lasne@gmail.com

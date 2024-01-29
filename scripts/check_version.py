@@ -1,37 +1,35 @@
-import io
 import re
 import subprocess
-import sys
-from os import path
+
+from packaging import version
 
 
-def read(*names, **kwargs):
-    with io.open(path.join(path.dirname(__file__), *names), encoding=kwargs.get("encoding", "utf8")) as file:
-        return file.read()
+cat_cmd = subprocess.Popen(("cat", "hub_backend/__init__.py"), stdout=subprocess.PIPE)
+output = subprocess.check_output(("grep", "__version__"), stdin=cat_cmd.stdout).decode("utf-8").strip()
+cat_cmd.wait()
 
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
+# Regular expression pattern to find the version
+version_pattern = r'__version__ = "([0-9]+\.[0-9]+\.[0-9]+)"'
+
+# Search for the pattern and extract the version
+match = re.search(version_pattern, output)
+if match:
+    current_version = match.group(1)
+else:
+    raise ValueError("Version not found in __init__.py")
+
+previous_version = (
+    subprocess.check_output(["git", "describe", "--abbrev=0", "--tags"]).decode("utf-8").replace("v", "").strip()
+)
+
+print(f"Current version:  {current_version}")
+print(f"Previous version: {previous_version}")
 
 
-def version():
-    return find_version("../dst_package/__init__.py")
-
-
-if __name__ == "__main__":
-    current_version = version()
-    latest_tag_id = subprocess.getoutput("git rev-list --tags --max-count=1")
-    last_version = subprocess.getoutput(f"git describe --tags {latest_tag_id}")
-
-    print(f"Current version: {current_version}")
-    print(f"Last version: {last_version}")
-
-    if current_version == last_version.replace("v", ""):
-        sys.exit(
-            f"Package version hasn't changed. "
-            f"Latest version from tags is {last_version} and version from __init__ is {current_version}"
-        )
+if version.parse(current_version) <= version.parse(previous_version):
+    print("Version has not been incremented.")
+    exit(1)
+else:
+    print("Version has been incremented.")
+    exit(0)

@@ -25,9 +25,9 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "dst_package"
+name = "shellhub"
 authors = [
-    {name = "Jules Lasne", email = "jules@datascientest.com"},
+    {name = "Jules Lasne", email = "jules.lasne@gmail.com"},
 ]
 readme = "README.md"
 dynamic = ["version"]
@@ -39,11 +39,14 @@ classifiers=[
     "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.8",
 ]
 dependencies = [""]
 
 [tool.setuptools]
-packages = ["dst_package"]
+packages = ["shellhub"]
 
 [tool.setuptools.dynamic]
-version = {attr = "dst_package.__version__"}
+version = {attr = "shellhub.__version__"}
