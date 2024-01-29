@@ -1,0 +1,20 @@
+name: Linting
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-version-update:
+    name: Check if the version has been updated
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get tags
+        run: git fetch --tags origin
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Check the version
+        run: python3 scripts/check_version.py

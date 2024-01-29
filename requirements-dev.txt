@@ -1,0 +1,5 @@
+black
+reorder-python-imports
+flake8
+pre-commit
+-r requirements.txt

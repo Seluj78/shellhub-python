@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: meta-lint-commit
+        name: Lint commit messages
+        entry: ./scripts/lint-commit.sh
+        language: script
+        stages: [ commit-msg ]
+  -   repo: https://github.com/pycqa/flake8
+      rev: 6.0.0
+      hooks:
+        -   id: flake8
+  -   repo: https://github.com/ambv/black
+      rev: 23.1.0
+      hooks:
+        - id: black
+          exclude: ^migrations/
+          language_version: python3
+  -   repo: https://github.com/asottile/reorder_python_imports
+      rev: v3.9.0
+      hooks:
+        -   id: reorder-python-imports
+            args: [--py3-plus]
