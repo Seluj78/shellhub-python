@@ -1,0 +1,36 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  set_version:
+    name: Set the version of the release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: set_version
+        run: |
+          echo version=$( sed -e 's/__version__ = "\(.*\)"/\1/g' <<< $(grep -E '__version__ = ' shellhub/__init__.py)) >> "$GITHUB_OUTPUT"
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+
+  gh-release:
+    name: Create a release in GitHub
+    needs:
+    - set_version
+    runs-on: ubuntu-latest
+    if: test -z "${{ needs.set_version.outputs.version }}"
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          tag_name: v${{ needs.set_version.outputs.version }}
+          generate_release_notes: true
