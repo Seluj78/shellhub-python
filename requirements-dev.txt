@@ -3,3 +3,7 @@ reorder-python-imports
 flake8
 pre-commit
 -r requirements.txt
+
+pytest
+requests-mock
+pytest-cov

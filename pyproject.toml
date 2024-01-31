@@ -50,3 +50,22 @@ packages = ["shellhub"]
 
 [tool.setuptools.dynamic]
 version = {attr = "shellhub.__version__"}
+
+[tool.coverage.run]
+branch = true
+source = ['shellhub/', 'tests/']
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+testpaths = [
+  "tests",
+]
+addopts = [
+  "--strict-markers",
+  "-W ignore::DeprecationWarning",
+  "-W ignore::PendingDeprecationWarning",
+]
+markers = [
+]
