@@ -98,3 +98,4 @@ jules.lasne@gmail.com
 - [ ] Migrate tests to pytest-recording
 - [ ] Add a readthedocs documentation
 - [ ] Switch to an OpenAPI generated client ? see https://github.com/shellhub-io/shellhub/issues/3497#issuecomment-1917478654
+- [ ] Add deployment to pypi on merge to main
