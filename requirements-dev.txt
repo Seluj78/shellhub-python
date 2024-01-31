@@ -1,6 +1,8 @@
 black
 reorder-python-imports
 flake8
+mypy
+types-requests
 pre-commit
 -r requirements.txt
 

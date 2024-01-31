@@ -1,3 +1,4 @@
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -12,21 +13,21 @@ class ShellHubDeviceInfo:
     arch: str
     platform: str
 
-    def __init__(self, device_info_json: dict):
+    def __init__(self, device_info_json: Dict[str, str]):
         self.id = device_info_json["id"]
         self.pretty_name = device_info_json["pretty_name"]
         self.version = device_info_json["version"]
         self.arch = device_info_json["arch"]
         self.platform = device_info_json["platform"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"ShellHubDeviceInfo(id={self.id}, pretty_name={self.pretty_name}, "
             f"version={self.version}, arch={self.arch}, platform={self.platform})"
         )
 
-    def __str__(self):
-        return self.__repr__()
+    def __str__(self) -> str:
+        return self.pretty_name
 
 
 class ShellHubDevice:
@@ -46,7 +47,7 @@ class ShellHubDevice:
     tags: List[str]
     acceptable: bool
 
-    def __init__(self, api_object: shellhub.models.base.ShellHub, device_json: dict):
+    def __init__(self, api_object: shellhub.models.base.ShellHub, device_json):  # type: ignore
         self._api = api_object
 
         self.uid = device_json["uid"]
@@ -68,7 +69,7 @@ class ShellHubDevice:
         self.tags = device_json["tags"]
         self.acceptable = device_json["acceptable"]
 
-    def delete(self):
+    def delete(self) -> bool:
         response = self._api.make_request(endpoint=f"/api/devices/{self.uid}", method="DELETE")
         if response.status_code == 200:
             return True
@@ -76,8 +77,9 @@ class ShellHubDevice:
             raise ShellHubApiError(f"Device {self.uid} not found.")
         else:
             response.raise_for_status()
+            return False
 
-    def rename(self, name: Optional[str] = None):
+    def rename(self, name: Optional[str] = None) -> bool:
         """
         Set a new name for the device. If no name is provided, the name will be the mac address of the device
         """
@@ -93,8 +95,9 @@ class ShellHubDevice:
             raise ShellHubApiError(f"Device with name {name} already exists.")
         else:
             response.raise_for_status()
+            return False
 
-    def accept(self):
+    def accept(self) -> bool:
         if not self.acceptable:
             raise ShellHubApiError(f"Device {self.uid} is not acceptable.")
 
@@ -106,19 +109,20 @@ class ShellHubDevice:
             raise ShellHubApiError(f"Device {self.uid} not found.")
         else:
             response.raise_for_status()
+            return False
 
-    def refresh(self):
+    def refresh(self) -> None:
         response = self._api.make_request(endpoint=f"/api/devices/{self.uid}", method="GET")
         if response.status_code == 404:
             raise ShellHubApiError(f"Device {self.uid} not found.")
         elif response.status_code != 200:
             response.raise_for_status()
-        self.__init__(self._api, response.json())
+        self.__init__(self._api, response.json())  # type: ignore
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"ShellHubDevice(name={self.name}, online={self.online}, namespace={self.namespace}, status={self.status})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.uid

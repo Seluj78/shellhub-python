@@ -1,3 +1,5 @@
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -13,7 +15,7 @@ class ShellHub:
     _endpoint: str
     _access_token: Optional[str]
 
-    def __init__(self, username: str, password: str, endpoint: str):
+    def __init__(self, username: str, password: str, endpoint: str) -> None:
         self._username: str = username
         self._password: str = password
         self._endpoint: str = endpoint
@@ -21,13 +23,13 @@ class ShellHub:
 
         self._login()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ShellHub username={self._username} endpoint={self._endpoint}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._endpoint
 
-    def _login(self):
+    def _login(self) -> None:
         try:
             response = requests.post(
                 f"{self._endpoint}/api/login",
@@ -46,8 +48,12 @@ class ShellHub:
         self._access_token = response.json()["token"]
 
     def make_request(
-        self, endpoint: str, method: str, query_params: Optional[dict] = None, json: Optional[dict] = None
-    ):
+        self,
+        endpoint: str,
+        method: str,
+        query_params: Optional[Dict[Any, Any]] = None,
+        json: Optional[Dict[Any, Any]] = None,
+    ) -> requests.Response:
         params = ""
         if query_params:
             params = "?"
@@ -55,7 +61,7 @@ class ShellHub:
                 params += f"{key}={value}&"
             params = params[:-1]
 
-        response = getattr(requests, method.lower())(
+        response: requests.Response = getattr(requests, method.lower())(
             f"{self._endpoint}{endpoint}{params if params else ''}",
             headers={
                 "Authorization": f"Bearer {self._access_token}",
@@ -64,7 +70,9 @@ class ShellHub:
         )
         return response
 
-    def _get_devices(self, query_params: Optional[dict] = None) -> "List[shellhub.models.device.ShellHubDevice]":
+    def _get_devices(
+        self, query_params: Optional[Dict[Any, Any]] = None
+    ) -> "List[shellhub.models.device.ShellHubDevice]":
         response = self.make_request(endpoint="/api/devices", method="GET", query_params=query_params)
 
         response.raise_for_status()
@@ -75,7 +83,7 @@ class ShellHub:
         return devices
 
     def get_all_devices(
-        self, status: Optional[str] = None, query_params: Optional[dict] = None
+        self, status: Optional[str] = None, query_params: Optional[Dict[Any, Any]] = None
     ) -> "List[shellhub.models.device.ShellHubDevice]":
         """
         Get all devices from ShellHub. Default gets all devices
