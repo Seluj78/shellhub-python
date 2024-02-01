@@ -99,3 +99,6 @@ jules.lasne@gmail.com
 - [ ] Add a readthedocs documentation
 - [ ] Switch to an OpenAPI generated client ? see https://github.com/shellhub-io/shellhub/issues/3497#issuecomment-1917478654
 - [ ] Add deployment to pypi on merge to main
+- [ ] Add a changelog
+- [ ] Setup coverage reporting
+- [ ] Update tests to tests on multiple python versions
