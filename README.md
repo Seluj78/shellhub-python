@@ -1,5 +1,7 @@
 # [Shellhub Python SDK]
 
+[![codecov](https://codecov.io/gh/Seluj78/shellhub-python/graph/badge.svg?token=FPWuNDtwdz)](https://codecov.io/gh/Seluj78/shellhub-python)
+
 * [What is it](#what-is-it)
 * [Installation](#installation)
    * [Locally](#locally)
