@@ -9,3 +9,8 @@ pre-commit
 pytest
 requests-mock
 pytest-cov
+tox
+build
+setuptools
+wheel
+twine
