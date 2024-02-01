@@ -68,6 +68,19 @@ class ShellHub:
             },
             json=json,
         )
+
+        if response.status_code == 401:
+            self._login()
+            response = getattr(requests, method.lower())(
+                f"{self._endpoint}{endpoint}{params if params else ''}",
+                headers={
+                    "Authorization": f"Bearer {self._access_token}",
+                },
+                json=json,
+            )
+            if response.status_code == 401:
+                raise ShellHubApiError("Couldn't fix request with a token refresh")
+
         return response
 
     def _get_devices(
