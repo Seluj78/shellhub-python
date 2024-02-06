@@ -104,24 +104,6 @@ class TestGetDevice:
         requests_mock.get("http://localhost.shellhub/api/devices/1", json=mock_response)
         device = shellhub.get_device("1")
 
-        """
-                self.uid = device_json["uid"]
-        self.name = device_json["name"]
-        self.mac_address = device_json["identity"]["mac"]
-        self.info = ShellHubDeviceInfo(device_json["info"])
-        self.public_key = device_json["public_key"]
-        self.tenant_id = device_json["tenant_id"]
-        self.last_seen = device_json["last_seen"]
-        self.online = device_json["online"]
-        self.namespace = device_json["namespace"]
-        self.status = device_json["status"]
-        self.status_updated_at = device_json["status_updated_at"]
-        self.created_at = device_json["created_at"]
-        self.remote_addr = device_json["remote_addr"]
-        self.tags = device_json["tags"]
-        self.acceptable = device_json["acceptable"]
-        """
-
         assert device.uid == "1"
         assert device.name == "default"
         assert device.mac_address == "06:04:ju:le:s7:08"
