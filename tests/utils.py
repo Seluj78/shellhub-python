@@ -1,1 +1,1 @@
-MOCKED_DOMAIN_URL = "http://shellhub.localhost"
+MOCKED_DOMAIN_URL = "http://shellhub.example.org"
