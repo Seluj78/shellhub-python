@@ -2,20 +2,21 @@ import pytest
 import requests_mock as r_mock
 
 from shellhub import ShellHub
+from tests.utils import MOCKED_DOMAIN_URL
 
 
 @pytest.fixture(scope="function")
 def shellhub():
     with r_mock.Mocker() as m:
         # Mock the login URL
-        login_url = "http://localhost.shellhub/api/login"
+        login_url = f"{MOCKED_DOMAIN_URL}/api/login"
         mock_response = {
             "token": "jwt_token",
         }
         m.post(login_url, json=mock_response)
 
         # Create an instance of ShellHub with mocked login
-        shellhub_instance = ShellHub(username="john.doe", password="dolphin", endpoint="http://localhost.shellhub")
+        shellhub_instance = ShellHub(username="john.doe", password="dolphin", endpoint=MOCKED_DOMAIN_URL)
 
         yield shellhub_instance
 
@@ -51,5 +52,5 @@ def shellhub_device(shellhub, requests_mock):
             "acceptable": False,
         }
     ]
-    requests_mock.get("http://localhost.shellhub/api/devices", json=mock_response)
+    requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices", json=mock_response)
     return shellhub.get_all_devices()[0]

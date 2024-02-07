@@ -2,7 +2,10 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+import requests
+
 import shellhub.models.base
+from shellhub.exceptions import DeviceNotFoundError
 from shellhub.exceptions import ShellHubApiError
 
 
@@ -56,14 +59,11 @@ class ShellHubDevice:
         self.info = ShellHubDeviceInfo(device_json["info"])
         self.public_key = device_json["public_key"]
         self.tenant_id = device_json["tenant_id"]
-        # TODO: Convert to datetime object
         self.last_seen = device_json["last_seen"]
         self.online = device_json["online"]
         self.namespace = device_json["namespace"]
         self.status = device_json["status"]
-        # TODO: Convert to datetime object
         self.status_updated_at = device_json["status_updated_at"]
-        # TODO: Convert to datetime object
         self.created_at = device_json["created_at"]
         self.remote_addr = device_json["remote_addr"]
         self.tags = device_json["tags"]
@@ -74,10 +74,14 @@ class ShellHubDevice:
         if response.status_code == 200:
             return True
         elif response.status_code == 404:
-            raise ShellHubApiError(f"Device {self.uid} not found.")
+            raise DeviceNotFoundError(f"Device {self.uid} not found.")
         else:
-            response.raise_for_status()
-            return False
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
+            else:
+                return False
 
     def rename(self, name: Optional[str] = None) -> bool:
         """
@@ -90,12 +94,16 @@ class ShellHubDevice:
             self.name = name
             return True
         elif response.status_code == 404:
-            raise ShellHubApiError(f"Device {self.uid} not found.")
+            raise DeviceNotFoundError(f"Device {self.uid} not found.")
         elif response.status_code == 409:
             raise ShellHubApiError(f"Device with name {name} already exists.")
         else:
-            response.raise_for_status()
-            return False
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
+            else:
+                return False
 
     def accept(self) -> bool:
         if not self.acceptable:
@@ -106,18 +114,26 @@ class ShellHubDevice:
             self.refresh()
             return True
         elif response.status_code == 404:
-            raise ShellHubApiError(f"Device {self.uid} not found.")
+            raise DeviceNotFoundError(f"Device {self.uid} not found.")
         else:
-            response.raise_for_status()
-            return False
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
+            else:
+                return False
 
     def refresh(self) -> None:
         response = self._api.make_request(endpoint=f"/api/devices/{self.uid}", method="GET")
         if response.status_code == 404:
-            raise ShellHubApiError(f"Device {self.uid} not found.")
-        elif response.status_code != 200:
-            response.raise_for_status()
-        self.__init__(self._api, response.json())  # type: ignore
+            raise DeviceNotFoundError(f"Device {self.uid} not found.")
+        elif response.status_code == 200:
+            self.__init__(self._api, response.json())  # type: ignore
+        else:
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
 
     def __repr__(self) -> str:
         return (

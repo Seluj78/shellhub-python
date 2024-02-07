@@ -6,7 +6,10 @@ from typing import Optional
 import requests
 
 import shellhub.models.device
+from shellhub.exceptions import DeviceNotFoundError
 from shellhub.exceptions import ShellHubApiError
+from shellhub.exceptions import ShellHubAuthenticationError
+from shellhub.exceptions import ShellHubBaseException
 
 
 class ShellHub:
@@ -39,13 +42,17 @@ class ShellHub:
                 },
             )
         except requests.exceptions.ConnectionError:
-            raise ValueError("Incorrect endpoint. Is the server up and running ?")
+            raise ShellHubBaseException("Incorrect endpoint. Is the server up and running ?")
 
         if response.status_code == 401:
-            raise ShellHubApiError("Incorrect username or password")
+            raise ShellHubAuthenticationError("Incorrect username or password")
         elif response.status_code != 200:
-            response.raise_for_status()
-        self._access_token = response.json()["token"]
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
+        else:
+            self._access_token = response.json()["token"]
 
     def make_request(
         self,
@@ -79,7 +86,7 @@ class ShellHub:
                 json=json,
             )
             if response.status_code == 401:
-                raise ShellHubApiError("Couldn't fix request with a token refresh")
+                raise ShellHubApiError(f"Couldn't fix request with a token refresh: {response.text}")
 
         return response
 
@@ -88,7 +95,10 @@ class ShellHub:
     ) -> "List[shellhub.models.device.ShellHubDevice]":
         response = self.make_request(endpoint="/api/devices", method="GET", query_params=query_params)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            raise ShellHubApiError(e)
 
         devices = []
         for device in response.json():
@@ -120,7 +130,11 @@ class ShellHub:
     def get_device(self, uid: str) -> "shellhub.models.device.ShellHubDevice":
         response = self.make_request(endpoint=f"/api/devices/{uid}", method="GET")
         if response.status_code == 404:
-            raise ShellHubApiError(f"Device {uid} not found.")
-        elif response.status_code != 200:
-            response.raise_for_status()
-        return shellhub.models.device.ShellHubDevice(self, response.json())
+            raise DeviceNotFoundError(f"Device {uid} not found.")
+        else:
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                raise ShellHubApiError(e)
+            else:
+                return shellhub.models.device.ShellHubDevice(self, response.json())

@@ -1,6 +1,7 @@
 import pytest
 
 from shellhub.exceptions import ShellHubApiError
+from tests.utils import MOCKED_DOMAIN_URL
 
 
 def test_repr(shellhub_device):
@@ -14,7 +15,7 @@ def test_str(shellhub_device):
 class TestGetDevices:
     def test_get_no_devices(self, shellhub, requests_mock):
         mock_response = []
-        requests_mock.get("http://localhost.shellhub/api/devices", json=mock_response)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices", json=mock_response)
         devices = shellhub.get_all_devices()
         assert len(devices) == 0
 
@@ -62,14 +63,14 @@ class TestGetDevices:
                 "acceptable": False,
             }
         ]
-        requests_mock.get("http://localhost.shellhub/api/devices", json=mock_response)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices", json=mock_response)
         devices = shellhub.get_all_devices(status=status)
         assert len(devices) == 1
 
 
 class TestGetDevice:
     def test_device_not_found(self, shellhub, requests_mock):
-        requests_mock.get("http://localhost.shellhub/api/devices/1", status_code=404)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=404)
         with pytest.raises(ShellHubApiError):
             shellhub.get_device("1")
 
@@ -101,7 +102,7 @@ class TestGetDevice:
             "public_url_address": "",
             "acceptable": False,
         }
-        requests_mock.get("http://localhost.shellhub/api/devices/1", json=mock_response)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
         device = shellhub.get_device("1")
 
         assert device.uid == "1"
@@ -130,39 +131,39 @@ class TestGetDevice:
 
 class TestDeleteDevice:
     def test_delete_device(self, shellhub_device, requests_mock):
-        requests_mock.delete("http://localhost.shellhub/api/devices/1", status_code=200)
+        requests_mock.delete(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=200)
         assert shellhub_device.delete()
 
     def test_delete_device_already_deleted(self, shellhub_device, requests_mock):
-        requests_mock.delete("http://localhost.shellhub/api/devices/1", status_code=404)
+        requests_mock.delete(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=404)
         with pytest.raises(ShellHubApiError):
             shellhub_device.delete()
 
 
 class TestRenameDevice:
     def test_rename_device_new_name(self, shellhub_device, requests_mock):
-        requests_mock.put("http://localhost.shellhub/api/devices/1", status_code=200)
+        requests_mock.put(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=200)
         shellhub_device.rename("new_name")
 
         assert shellhub_device.name == "new_name"
 
     def test_rename_non_existent_device(self, shellhub_device, requests_mock):
-        requests_mock.put("http://localhost.shellhub/api/devices/1", status_code=404)
+        requests_mock.put(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=404)
         with pytest.raises(ShellHubApiError):
             shellhub_device.rename("new_name")
 
     def test_rename_conflict(self, shellhub_device, requests_mock):
-        requests_mock.put("http://localhost.shellhub/api/devices/1", status_code=409)
+        requests_mock.put(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=409)
         with pytest.raises(ShellHubApiError):
             shellhub_device.rename("new_name")
 
     def test_rename_original_name(self, shellhub_device, requests_mock):
-        requests_mock.put("http://localhost.shellhub/api/devices/1", status_code=200)
+        requests_mock.put(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=200)
         shellhub_device.rename("default")
 
         assert shellhub_device.name == "default"
 
-        requests_mock.put("http://localhost.shellhub/api/devices/1", status_code=200)
+        requests_mock.put(f"{MOCKED_DOMAIN_URL}/api/devices/1", status_code=200)
         shellhub_device.rename()
 
         assert shellhub_device.name == "06-04-ju-le-s7-08"
@@ -170,7 +171,7 @@ class TestRenameDevice:
 
 class TestRefreshDevice:
     def test_refresh_unknown_device(self, shellhub_device, requests_mock):
-        requests_mock.get("http://localhost.shellhub/api/devices/2", status_code=404)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/2", status_code=404)
         shellhub_device.uid = "2"
         with pytest.raises(ShellHubApiError):
             shellhub_device.refresh()
@@ -203,7 +204,7 @@ class TestRefreshDevice:
             "public_url_address": "",
             "acceptable": False,
         }
-        requests_mock.get("http://localhost.shellhub/api/devices/1", json=mock_response)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
 
         assert shellhub_device.uid == "1"
 
@@ -219,7 +220,7 @@ class TestAcceptDevice:
             shellhub_device.accept()
 
     def test_accept_notfound_device(self, shellhub_device, requests_mock):
-        requests_mock.post("http://localhost.shellhub/api/devices/1/accept", status_code=404)
+        requests_mock.post(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=404)
         shellhub_device.acceptable = True
         with pytest.raises(ShellHubApiError):
             shellhub_device.accept()
@@ -252,8 +253,8 @@ class TestAcceptDevice:
             "public_url_address": "",
             "acceptable": False,
         }
-        requests_mock.get("http://localhost.shellhub/api/devices/1", json=mock_response)
-        requests_mock.post("http://localhost.shellhub/api/devices/1/accept", status_code=200)
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
+        requests_mock.post(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=200)
 
         shellhub_device.acceptable = True
         shellhub_device.accept()
