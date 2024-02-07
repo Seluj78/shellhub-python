@@ -260,3 +260,8 @@ class TestAcceptDevice:
         shellhub_device.accept()
 
         assert not shellhub_device.acceptable
+
+
+class TestDeviceSSHID:
+    def test_get_sshid(self, shellhub_device, shellhub):
+        assert shellhub_device.sshid == f"{shellhub_device.namespace}.{shellhub_device.name}@{shellhub._endpoint}"
