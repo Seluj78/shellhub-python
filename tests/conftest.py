@@ -16,7 +16,7 @@ def shellhub():
         m.post(login_url, json=mock_response)
 
         # Create an instance of ShellHub with mocked login
-        shellhub_instance = ShellHub(username="john.doe", password="dolphin", endpoint=MOCKED_DOMAIN_URL)
+        shellhub_instance = ShellHub(username="john.doe", password="dolphin", endpoint_or_url=MOCKED_DOMAIN_URL)
 
         yield shellhub_instance
 

@@ -1,7 +1,10 @@
+import re
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
+from urllib.parse import urlparse
 
 import requests
 
@@ -16,26 +19,59 @@ class ShellHub:
     _username: str
     _password: str
     _endpoint: str
+    _url: str
     _access_token: Optional[str]
+    _use_ssl: bool
 
-    def __init__(self, username: str, password: str, endpoint: str) -> None:
-        self._username: str = username
-        self._password: str = password
-        self._endpoint: str = endpoint
-        self._access_token: Optional[str] = None
+    def __init__(self, username: str, password: str, endpoint_or_url: str, use_ssl: bool = True) -> None:
+        self._username = username
+        self._password = password
+        self._use_ssl = use_ssl
+        self._url, self._endpoint = self._format_and_validate_url(endpoint_or_url)
+        self._access_token = None
 
         self._login()
 
+    def _format_and_validate_url(self, endpoint: str) -> Tuple[str, str]:
+        # Adjust the endpoint based on the _use_ssl flag
+        if not endpoint.startswith(("http://", "https://")):
+            protocol = "https://" if self._use_ssl else "http://"
+            endpoint = protocol + endpoint
+
+        # Validate the URL (basic check)
+        if not self._is_valid_url(endpoint):
+            raise ShellHubBaseException("Invalid URL provided.")
+
+        # Use urlparse to extract the base endpoint without the scheme
+        parsed_url = urlparse(endpoint)
+        base_endpoint = parsed_url.netloc
+
+        return endpoint, base_endpoint  # Return both full URL and base endpoint
+
+    @staticmethod
+    def _is_valid_url(url: str) -> bool:
+        # Simple pattern to check if the URL is well-formed
+        pattern = re.compile(
+            r"^https?:\/\/"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+            r"localhost|"  # localhost...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+            r"(?::\d+)?"  # optional port
+            r"(?:\/[^\s]*)?$",
+            re.IGNORECASE,
+        )  # optional path
+        return re.match(pattern, url) is not None
+
     def __repr__(self) -> str:
-        return f"<ShellHub username={self._username} endpoint={self._endpoint}>"
+        return f"<ShellHub username={self._username} url={self._url}>"
 
     def __str__(self) -> str:
-        return self._endpoint
+        return self._url
 
     def _login(self) -> None:
         try:
             response = requests.post(
-                f"{self._endpoint}/api/login",
+                f"{self._url}/api/login",
                 json={
                     "username": self._username,
                     "password": self._password,
@@ -69,7 +105,7 @@ class ShellHub:
             params = params[:-1]
 
         response: requests.Response = getattr(requests, method.lower())(
-            f"{self._endpoint}{endpoint}{params if params else ''}",
+            f"{self._url}{endpoint}{params if params else ''}",
             headers={
                 "Authorization": f"Bearer {self._access_token}",
             },
@@ -79,7 +115,7 @@ class ShellHub:
         if response.status_code == 401:
             self._login()
             response = getattr(requests, method.lower())(
-                f"{self._endpoint}{endpoint}{params if params else ''}",
+                f"{self._url}{endpoint}{params if params else ''}",
                 headers={
                     "Authorization": f"Bearer {self._access_token}",
                 },
