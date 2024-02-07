@@ -135,6 +135,10 @@ class ShellHubDevice:
             except requests.exceptions.HTTPError as e:
                 raise ShellHubApiError(e)
 
+    @property
+    def sshid(self) -> str:
+        return f"{self.namespace}.{self.name}@{self._api._endpoint}"
+
     def __repr__(self) -> str:
         return (
             f"ShellHubDevice(name={self.name}, online={self.online}, namespace={self.namespace}, status={self.status})"
