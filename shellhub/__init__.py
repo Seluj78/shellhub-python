@@ -1,14 +1,22 @@
 # Increment versions here according to SemVer
 __version__ = "0.0.1"
 
-# Import here what you want to be able to import from this package and place it in __all__
-from shellhub.models.device import ShellHubDevice, ShellHubDeviceInfo
-from shellhub.models.base import ShellHub
-from shellhub.exceptions import ShellHubApiError
+from .models.device import ShellHubDevice, ShellHubDeviceInfo
+from .models.base import ShellHub
+from .exceptions import (
+    ShellHubApiError,
+    ShellHubAuthenticationError,
+    DeviceNotFoundError,
+    ShellHubBaseException,
+)
+
 
 __all__ = [
     "ShellHub",
     "ShellHubDevice",
     "ShellHubDeviceInfo",
     "ShellHubApiError",
+    "ShellHubAuthenticationError",
+    "DeviceNotFoundError",
+    "ShellHubBaseException",
 ]
