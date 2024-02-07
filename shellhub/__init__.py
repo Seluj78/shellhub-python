@@ -1,5 +1,5 @@
 # Increment versions here according to SemVer
-__version__ = "0.2.4"
+__version__ = "0.3.0"
 
 from .models.device import ShellHubDevice, ShellHubDeviceInfo
 from .models.base import ShellHub
