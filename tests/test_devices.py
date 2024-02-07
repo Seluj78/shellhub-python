@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from shellhub.exceptions import ShellHubApiError
@@ -118,15 +120,47 @@ class TestGetDevice:
             == "-----BEGIN RSA PUBLIC KEY-----\nxxx\nxxx\nxxx\nxxx\nxxx\nxxx\n-----END RSA PUBLIC KEY-----\n"
         )
         assert device.tenant_id == "1"
-        assert device.last_seen == "1970-01-01T00:00:00Z"
+        assert device.last_seen == datetime.fromisoformat("1970-01-01T00:00:00Z")
         assert device.online
         assert device.namespace == "dev"
         assert device.status == "accepted"
-        assert device.status_updated_at == "1970-01-01T00:00:00Z"
-        assert device.created_at == "1970-01-01T00:00:00Z"
+        assert device.status_updated_at == datetime.fromisoformat("1970-01-01T00:00:00Z")
+        assert device.created_at == datetime.fromisoformat("1970-01-01T00:00:00Z")
         assert device.remote_addr == "0.0.0.0"
         assert device.tags == []
         assert not device.acceptable
+
+    def test_get_incorrect_datetime_format(self, shellhub, requests_mock):
+        mock_response = {
+            "uid": "1",
+            "name": "default",
+            "identity": {"mac": "06:04:ju:le:s7:08"},
+            "info": {
+                "id": "ubuntu",
+                "pretty_name": "Ubuntu 20.04.2 LTS",
+                "version": "v0.14.1",
+                "arch": "amd64",
+                "platform": "docker",
+            },
+            "public_key": "-----BEGIN RSA PUBLIC KEY-----\nxxx\nxxx\nxxx\n"
+            "xxx\nxxx\nxxx\n-----END RSA PUBLIC KEY-----\n",
+            "tenant_id": "1",
+            "last_seen": "-1",
+            "online": True,
+            "namespace": "dev",
+            "status": "accepted",
+            "status_updated_at": "-1",
+            "created_at": "-1",
+            "remote_addr": "0.0.0.0",
+            "position": {"latitude": 0, "longitude": 0},
+            "tags": [],
+            "public_url": False,
+            "public_url_address": "",
+            "acceptable": False,
+        }
+        requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
+        with pytest.raises(ShellHubApiError):
+            shellhub.get_device("1")
 
 
 class TestDeleteDevice:

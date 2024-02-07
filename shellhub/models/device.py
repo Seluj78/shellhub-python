@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -40,12 +41,12 @@ class ShellHubDevice:
     info: ShellHubDeviceInfo
     public_key: str
     tenant_id: str
-    last_seen: str
+    last_seen: datetime
     online: bool
     namespace: str
     status: str
-    status_updated_at: str
-    created_at: str
+    status_updated_at: datetime
+    created_at: datetime
     remote_addr: str
     tags: List[str]
     acceptable: bool
@@ -59,15 +60,22 @@ class ShellHubDevice:
         self.info = ShellHubDeviceInfo(device_json["info"])
         self.public_key = device_json["public_key"]
         self.tenant_id = device_json["tenant_id"]
-        self.last_seen = device_json["last_seen"]
+        self.last_seen = self._safe_isoformat_to_datetime(device_json["last_seen"])
         self.online = device_json["online"]
         self.namespace = device_json["namespace"]
         self.status = device_json["status"]
-        self.status_updated_at = device_json["status_updated_at"]
-        self.created_at = device_json["created_at"]
+        self.status_updated_at = self._safe_isoformat_to_datetime(device_json["status_updated_at"])
+        self.created_at = self._safe_isoformat_to_datetime(device_json["created_at"])
         self.remote_addr = device_json["remote_addr"]
         self.tags = device_json["tags"]
         self.acceptable = device_json["acceptable"]
+
+    @staticmethod
+    def _safe_isoformat_to_datetime(date_string: str) -> datetime:
+        try:
+            return datetime.fromisoformat(date_string)
+        except ValueError as e:
+            raise ShellHubApiError(f"Invalid date string: {date_string} (Couldn't convert to datetime)") from e
 
     def delete(self) -> bool:
         """
