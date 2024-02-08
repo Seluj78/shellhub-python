@@ -52,7 +52,10 @@ classifiers=[
 dependencies = ["requests>=2.31.0"]
 
 [tool.setuptools]
-packages = ["shellhub"]
+packages = [
+    "shellhub",
+    "shellhub.models",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "shellhub.__version__"}
