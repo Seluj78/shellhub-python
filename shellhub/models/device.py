@@ -136,7 +136,9 @@ class ShellHubDevice:
                 raise ShellHubApiError(e)
 
     @property
-    def sshid(self) -> str:
+    def sshid(self) -> Optional[str]:
+        if self.acceptable:
+            return None
         return f"{self.namespace}.{self.name}@{self._api._endpoint}"
 
     def __repr__(self) -> str:
