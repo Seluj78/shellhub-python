@@ -74,16 +74,3 @@ jobs:
             if (errors.length > 0) {
               core.setFailed(`One or more of the commits in this PR do not match the code submission policy:\n\n${errors.join("\n")}`);
             }
-
-      - name: Comment on PR
-        uses: actions/github-script@v7
-        if: ${{ failure() && !github.event.pull_request.draft }}
-        with:
-          github-token: ${{ secrets.GH_ACCESS_KEY }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: 'Seluj78',
-              repo: 'shellhub-python',
-              body: 'Hello!\n\nOne or more of the commit messages in this PR do not match the code style. Please check the `lint_commits` CI job for more details on which commits were flagged and why.\nPlease do not close this PR and open another, instead modify your commit message(s) with [git commit --amend](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/changing-a-commit-message) and force push those changes to update this PR.'
-            })
