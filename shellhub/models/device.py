@@ -72,10 +72,25 @@ class ShellHubDevice:
 
     @staticmethod
     def _safe_isoformat_to_datetime(date_string: str) -> datetime:
+        # Replace "Z" with "+00:00" to indicate UTC in a format compatible with Python 3.7-3.10.
+        if date_string.endswith("Z"):
+            date_string = date_string[:-1] + "+00:00"
         try:
+            # Direct conversion using fromisoformat
             return datetime.fromisoformat(date_string)
-        except ValueError as e:
-            raise ShellHubApiError(f"Invalid date string: {date_string} (Couldn't convert to datetime)") from e
+        except ValueError:
+            try:
+                # For Python versions that do not handle offset-aware datetimes well in fromisoformat
+                # This part is more of a catch-all to ensure even non-standard or unexpected formats
+                # might be parsed, but primarily, the first attempt should work for ISO 8601 formats.
+                # Note: strptime might not be necessary if fromisoformat works after the 'Z' to '+00:00' replacement,
+                # but it's here as an example if further customization is needed.
+                return datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+            except ValueError as e:
+                # If the first attempt fails due to the format not being exactly ISO 8601 after 'Z' replacement,
+                # this additional attempt can catch other variations. This might not be strictly necessary,
+                # depending on your input formats.
+                raise ShellHubApiError(f"Invalid date string: {date_string} (Couldn't convert to datetime)") from e
 
     def delete(self) -> bool:
         """

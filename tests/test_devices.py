@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timezone
 
 import pytest
 
@@ -106,6 +107,7 @@ class TestGetDevice:
         }
         requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
         device = shellhub.get_device("1")
+        origin_time = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
 
         assert device.uid == "1"
         assert device.name == "default"
@@ -120,12 +122,12 @@ class TestGetDevice:
             == "-----BEGIN RSA PUBLIC KEY-----\nxxx\nxxx\nxxx\nxxx\nxxx\nxxx\n-----END RSA PUBLIC KEY-----\n"
         )
         assert device.tenant_id == "1"
-        assert device.last_seen == datetime.fromisoformat("1970-01-01T00:00:00Z")
+        assert device.last_seen == origin_time
         assert device.online
         assert device.namespace == "dev"
         assert device.status == "accepted"
-        assert device.status_updated_at == datetime.fromisoformat("1970-01-01T00:00:00Z")
-        assert device.created_at == datetime.fromisoformat("1970-01-01T00:00:00Z")
+        assert device.status_updated_at == origin_time
+        assert device.created_at == origin_time
         assert device.remote_addr == "0.0.0.0"
         assert device.tags == []
         assert not device.acceptable
