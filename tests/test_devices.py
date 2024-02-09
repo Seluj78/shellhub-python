@@ -220,7 +220,7 @@ class TestAcceptDevice:
             shellhub_device.accept()
 
     def test_accept_notfound_device(self, shellhub_device, requests_mock):
-        requests_mock.post(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=404)
+        requests_mock.patch(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=404)
         shellhub_device.acceptable = True
         with pytest.raises(ShellHubApiError):
             shellhub_device.accept()
@@ -254,7 +254,7 @@ class TestAcceptDevice:
             "acceptable": False,
         }
         requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
-        requests_mock.post(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=200)
+        requests_mock.patch(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=200)
 
         shellhub_device.acceptable = True
         shellhub_device.accept()

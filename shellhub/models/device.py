@@ -70,6 +70,10 @@ class ShellHubDevice:
         self.acceptable = device_json["acceptable"]
 
     def delete(self) -> bool:
+        """
+        Delete the device from the API
+        :return: True if the device was deleted, False otherwise
+        """
         response = self._api.make_request(endpoint=f"/api/devices/{self.uid}", method="DELETE")
         if response.status_code == 200:
             return True
@@ -106,10 +110,14 @@ class ShellHubDevice:
                 return False
 
     def accept(self) -> bool:
-        if not self.acceptable:
-            raise ShellHubApiError(f"Device {self.uid} is not acceptable.")
+        """
+        Accept the device if it is pending
+        :return: True if the device was accepted, False otherwise
+        """
+        if self.status != "pending":
+            raise ShellHubApiError(f"Device {self.uid} is not pending.")
 
-        response = self._api.make_request(endpoint=f"/api/devices/{self.uid}/accept", method="POST")
+        response = self._api.make_request(endpoint=f"/api/devices/{self.uid}/accept", method="PATCH")
         if response.status_code == 200:
             self.refresh()
             return True
@@ -124,6 +132,10 @@ class ShellHubDevice:
                 return False
 
     def refresh(self) -> None:
+        """
+        Refresh the device information from the API
+        :return: None
+        """
         response = self._api.make_request(endpoint=f"/api/devices/{self.uid}", method="GET")
         if response.status_code == 404:
             raise DeviceNotFoundError(f"Device {self.uid} not found.")
@@ -137,6 +149,10 @@ class ShellHubDevice:
 
     @property
     def sshid(self) -> Optional[str]:
+        """
+        Fabricates the SSHID of the devices from the namespace, name and endpoint
+        :return: SSHID of the device
+        """
         if self.acceptable:
             return None
         return f"{self.namespace}.{self.name}@{self._api._endpoint}"

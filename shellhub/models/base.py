@@ -33,6 +33,12 @@ class ShellHub:
         self._login()
 
     def _format_and_validate_url(self, endpoint: str) -> Tuple[str, str]:
+        """
+        Format and validate the URL provided by the user. If the URL doesn't start with http:// or https://, it will
+        :param endpoint: The URL provided by the user for the shellhub instance
+        :return: A tuple containing the full URL and the base endpoint
+        """
+
         # Adjust the endpoint based on the _use_ssl flag
         if not endpoint.startswith(("http://", "https://")):
             protocol = "https://" if self._use_ssl else "http://"
@@ -50,7 +56,11 @@ class ShellHub:
 
     @staticmethod
     def _is_valid_url(url: str) -> bool:
-        # Simple pattern to check if the URL is well-formed
+        """
+        Check if the URL provided is valid
+        :param url: The URL to be checked
+        :return: True if the URL is valid, False otherwise
+        """
         pattern = re.compile(
             r"^https?:\/\/"  # http:// or https://
             r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
@@ -164,6 +174,11 @@ class ShellHub:
         return devices
 
     def get_device(self, uid: str) -> "shellhub.models.device.ShellHubDevice":
+        """
+        Get a device from ShellHub by its UID
+        :param uid: The UID of the device
+        :return: A ShellHubDevice object
+        """
         response = self.make_request(endpoint=f"/api/devices/{uid}", method="GET")
         if response.status_code == 404:
             raise DeviceNotFoundError(f"Device {uid} not found.")
