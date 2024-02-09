@@ -256,7 +256,7 @@ class TestAcceptDevice:
         requests_mock.get(f"{MOCKED_DOMAIN_URL}/api/devices/1", json=mock_response)
         requests_mock.patch(f"{MOCKED_DOMAIN_URL}/api/devices/1/accept", status_code=200)
 
-        shellhub_device.acceptable = True
+        shellhub_device.status = "pending"
         shellhub_device.accept()
 
         assert not shellhub_device.acceptable
