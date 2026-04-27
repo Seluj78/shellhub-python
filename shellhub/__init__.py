@@ -10,7 +10,6 @@ from .exceptions import (
     ShellHubBaseException,
 )
 
-
 __all__ = [
     "ShellHub",
     "ShellHubDevice",
