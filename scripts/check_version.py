@@ -3,7 +3,6 @@ import subprocess
 
 from packaging import version
 
-
 cat_cmd = subprocess.Popen(("cat", "shellhub/__init__.py"), stdout=subprocess.PIPE)
 output = subprocess.check_output(("grep", "__version__"), stdin=cat_cmd.stdout).decode("utf-8").strip()
 cat_cmd.wait()
